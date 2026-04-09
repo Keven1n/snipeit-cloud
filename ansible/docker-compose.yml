@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  snipe-mysql:
+    image: mariadb:10.11
+    container_name: snipe-mysql
+    env_file:
+      - .env
+    volumes:
+      - snipedb-vol:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+
+  snipe-it:
+    image: snipe/snipe-it:latest
+    container_name: snipe-it
+    depends_on:
+      - snipe-mysql
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    volumes:
+      - snipestorage-vol:/var/lib/snipeit
+    restart: always
+
+volumes:
+  snipedb-vol:
+  snipestorage-vol:

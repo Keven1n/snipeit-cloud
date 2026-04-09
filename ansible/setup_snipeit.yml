@@ -1,0 +1,98 @@
+---
+- name: Configurar Servidor Snipe-IT
+  hosts: all
+  become: yes
+  gather_facts: yes
+  vars:
+    snipeit_dir: /opt/snipeit
+  
+  tasks:
+    - name: Esperar o apt lock liberar (caso exista um update rolando)
+      shell: while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 5; done;
+
+    - name: Atualizar cache apt
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Instalar dependências do Docker
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+
+    - name: Baixar chave GPG oficial do Docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Adicionar repositório do Docker
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Instalar Docker e Docker Compose Plugin
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Garantir que o serviço Docker está ativo e configurado para iniciar no boot
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Criar diretório para o Snipe-IT
+      file:
+        path: "{{ snipeit_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copiar arquivo docker-compose.yml
+      copy:
+        src: docker-compose.yml
+        dest: "{{ snipeit_dir }}/docker-compose.yml"
+
+    - name: Criar arquivo .env com configurações locais
+      copy:
+        dest: "{{ snipeit_dir }}/.env"
+        content: |
+          # MySQL DB Settings
+          MYSQL_ROOT_PASSWORD=super_secret_root
+          MYSQL_DATABASE=snipeit
+          MYSQL_USER=snipeit
+          MYSQL_PASSWORD=super_secret_db_pass
+
+          # Snipe-IT Settings
+          APP_ENV=production
+          APP_DEBUG=false
+          APP_KEY=base64:ZG9udHVzZXRoaXNhcHBrZXlpdHNpbnNlY3VyZTEyMzQ=
+          APP_URL=http://{{ ansible_host }}
+          APP_TIMEZONE=America/Sao_Paulo
+          APP_LOCALE=pt-BR
+
+          DB_CONNECTION=mysql
+          DB_HOST=snipe-mysql
+          DB_DATABASE=snipeit
+          DB_USERNAME=snipeit
+          DB_PASSWORD=super_secret_db_pass
+          DB_PREFIX=null
+          DB_DUMP_PATH='/usr/bin'
+          DB_CHARSET=utf8mb4
+          DB_COLLATION=utf8mb4_unicode_ci
+
+          MAIL_DRIVER=log
+          MAIL_ENV_FROM=admin@exemplo.com
+
+    - name: Subir containers do Docker Compose
+      command: docker compose up -d
+      args:
+        chdir: "{{ snipeit_dir }}"

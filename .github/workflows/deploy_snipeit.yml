@@ -1,0 +1,67 @@
+name: Deploy Snipe-IT to AWS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-infra-and-app:
+    name: Provision AWS & Configure Server
+    runs-on: ubuntu-latest
+    
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-east-1
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # ==== TERRAFORM ====
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: terraform apply -auto-approve
+
+      # ==== ANSIBLE ====
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Fix SSH Key Permissions
+        # O Terraform gerou essa chave localmente pela action 'local_sensitive_file'
+        working-directory: ansible
+        run: chmod 400 snipeit-key.pem
+
+      - name: Run Ansible Playbook
+        working-directory: ansible
+        run: |
+          PUBLIC_IP=$(terraform -chdir=../terraform output -raw public_ip)
+          echo "Starting Ansible on $PUBLIC_IP"
+          ansible-playbook -i "$PUBLIC_IP," -u ubuntu --private-key snipeit-key.pem setup_snipeit.yml
+
+      - name: Show Final URL
+        working-directory: terraform
+        run: |
+          echo "====================================="
+          echo "✅ O seu Snipe-IT foi atualizado!"
+          echo "🔗 URL: http://$(terraform output -raw public_ip)"
+          echo "====================================="

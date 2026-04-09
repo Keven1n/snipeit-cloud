@@ -1,0 +1,17 @@
+# Ignorar Chaves SSH (MUITO IMPORTANTE)
+*.pem
+*.pub
+
+# Ignorar o estado local do Terraform e backups
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Arquivos sensíveis criados por editores e SO
+.DS_Store
+.idea/
+.vscode/
+
+# Ansible
+*.retry
