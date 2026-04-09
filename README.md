@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white" />
 </p>
 
-## 📌 Sobre o Projeto
+## Sobre o Projeto
 Este repositório contém uma arquitetura **DevOps completa e automatizada** para o provisionamento do [Snipe-IT](https://snipeitapp.com/) (Sistema de Gestão de Ativos Open-Source) na nuvem pública AWS.
 
 O objetivo do projeto é demonstrar práticas modernas de **Infraestrutura como Código (IaC)**, **Gestão de Configuração** e **CI/CD**, saindo do zero absoluto até uma aplicação web conteinerizada e pronta para uso corporativo, sem a necessidade de intervenção manual no servidor.
@@ -22,7 +22,7 @@ O objetivo do projeto é demonstrar práticas modernas de **Infraestrutura como 
 4. **Docker Compose:** Orquestra os contêineres do Snipe-IT em PHP e seu banco de dados primário (MariaDB).
 5. **GitHub Actions (CI/CD):** Esteira automatizada que atua como gatilho. A cada *Commit/Push* direcionado à branch `main`, o GitHub inicia um runner limpo, valida credenciais, invoca o Terraform e roda o Playbook do Ansible do começo ao fim.
 
-## 🚀 Como Funciona (Pipeline)
+## Como Funciona (Pipeline)
 
 Ao realizar uma atualização de código neste repositório, o GitHub Actions executa os steps:
 - Clonagem do repositório interno.
@@ -31,7 +31,7 @@ Ao realizar uma atualização de código neste repositório, o GitHub Actions ex
 - Parsing dinâmico de IPs e permissões Linux para o Ansible.
 - Execução do Playbook (`setup_snipeit.yml`), aplicando idempotência sobre o servidor EC2 instanciado.
 
-## 👨‍💻 Como replicar no seu ambiente
+## Como replicar no seu ambiente
 
 ### Pré-requisitos:
 - Uma conta ativa na [Amazon Web Services (AWS)](https://aws.amazon.com/).
