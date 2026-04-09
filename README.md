@@ -15,7 +15,7 @@ Este repositório contém uma arquitetura **DevOps completa e automatizada** par
 
 O objetivo do projeto é demonstrar práticas modernas de **Infraestrutura como Código (IaC)**, **Gestão de Configuração** e **CI/CD**, saindo do zero absoluto até uma aplicação web conteinerizada e pronta para uso corporativo, sem a necessidade de intervenção manual no servidor.
 
-## 🏛️ Arquitetura
+## Arquitetura
 1. **Terraform (IaC):** Responsável por conversar com a AWS, provisionar uma máquina virtual (EC2) Ubuntu, liberar portas de Rede HTTP/SSH (Security Groups) e criar/salvar as chaves criptográficas (KeyPairs).
 2. **S3 & DynamoDB (Remote State):** O cérebro do Terraform fica armazenado em um Bucket S3 isolado na nuvem, enquanto o DynamoDB gerencia o "State Lock" para impedir que execuções simultâneas corrompam a infraestrutura.
 3. **Ansible (Configuration Management):** Lê o IP gerado pelo Terraform e conecta na máquina para instalar dependências vitais (Docker e Docker Compose), gerando os arquivos de ambiente `.env` e subindo a stack dinâmica.
